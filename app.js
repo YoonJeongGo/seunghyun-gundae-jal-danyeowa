@@ -1,5 +1,5 @@
 import { PetPlayer } from './pet-player.js';
-import { DragNavigator } from './drag-navigation.js';
+import { DragNavigator } from './drag-navigation.js?v=8-touch';
 import { getDday, millisecondsUntilKoreanMidnight } from './dday.js';
 import { t, setLanguage, applyLanguage } from './i18n.js';
 

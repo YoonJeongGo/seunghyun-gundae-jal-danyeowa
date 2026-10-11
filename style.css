@@ -35,7 +35,7 @@ h1:focus { outline: none; }
 .progress li.is-current, .progress li.is-done { background: var(--green); }
 #stepCount { font-size: 10px; letter-spacing: 1.6px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .scene-shell { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) var(--pet-height); gap: 12px; padding: 12px 24px 0; overflow: hidden; }
-.scene-content { min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 0 3px 12px; scrollbar-width: thin; scrollbar-color: #c4cdb9 transparent; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+.scene-content { min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 0 3px 12px; scrollbar-width: thin; scrollbar-color: #c4cdb9 transparent; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 .scene-content:focus-visible { outline: 1px solid var(--line); outline-offset: -1px; }
 .scene { width: 100%; text-align: center; }
 .eyebrow { font-size: 11px; letter-spacing: .2px; color: var(--muted); margin-bottom: 16px; }
@@ -44,8 +44,8 @@ h1:focus { outline: none; }
 .intro { margin-top: 18px; font-size: 15px; line-height: 1.8; letter-spacing: -.4px; color: #69755f; word-break: keep-all; overflow-wrap: break-word; }
 .small-note { font-size: 11px; line-height: 1.7; color: var(--muted); margin-top: 14px; }
 .scene h1, .scene .eyebrow, .scene > .intro { animation: enter .25s ease both; }
-.pet-view { position: relative; height: var(--pet-height); min-height: 0; margin: 0; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
-.pet-view canvas { width: calc(var(--pet-height) * 12 / 13); height: var(--pet-height); display: block; position: relative; z-index: 1; cursor: inherit; touch-action: pan-y; transform: translateX(var(--pet-x, 0px)); will-change: transform; }
+.pet-view { position: relative; height: var(--pet-height); min-height: 0; margin: 0; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.pet-view canvas { width: calc(var(--pet-height) * 12 / 13); height: var(--pet-height); display: block; position: relative; z-index: 1; cursor: inherit; touch-action: none; transform: translateX(var(--pet-x, 0px)); will-change: transform; }
 .pet-ground { position: absolute; width: calc(var(--pet-height) * .62); height: 7px; background: #e5e9dc; border-radius: 50%; bottom: 7px; left: 50%; transform: translateX(calc(-50% + var(--pet-x, 0px))); }
 .pet-touch { position: absolute; right: 0; top: 10px; pointer-events: none; color: #8b957e; font-size: 10px; line-height: 1.5; z-index: 3; }
 .pet-status { position: absolute; bottom: 75px; left: 0; right: 0; text-align: center; z-index: 3; font-size: 11px; color: var(--muted); }

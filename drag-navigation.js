@@ -7,7 +7,9 @@ export class DragNavigator {
     region.addEventListener('pointermove',e=>this.move(e),{passive:false});
     region.addEventListener('pointerup',e=>this.up(e));
     region.addEventListener('pointercancel',e=>this.cancel(e));
-    region.addEventListener('lostpointercapture',e=>{if(this.gesture?.id===e.pointerId)this.cancel(e);});
+    // Touch starts with capture on the child. Its loss while transferring to
+    // the app bubbles here, but only loss of the app's own capture cancels us.
+    region.addEventListener('lostpointercapture',e=>{if(e.target===region&&this.gesture?.id===e.pointerId)this.cancel(e);});
     region.addEventListener('click',e=>{if(this.busy||this.gesture?.locked||performance.now()<this.ignoreClickUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
     document.addEventListener('visibilitychange',()=>{if(document.hidden)this.background();});
   }
@@ -16,14 +18,20 @@ export class DragNavigator {
     if(this.busy||this.gesture||e.isPrimary===false||(e.button!==undefined&&e.button!==0))return;
     if(e.target.closest('a,input,textarea,select,[contenteditable=true]'))return;
     const button=e.target.closest('button');if(button&&button.id!=='parcelButton')return;
-    this.gesture={id:e.pointerId,x:e.clientX,y:e.clientY,dx:0,locked:false};
+    const characterSurface=this.view.contains(e.target);
+    this.gesture={id:e.pointerId,x:e.clientX,y:e.clientY,dx:0,locked:false,characterSurface};
+    // Keep a finger on the character even when its first movement is slight.
+    // A parcel tap retains its button capture so its normal click still works.
+    if(characterSurface&&!button&&e.pointerType==='touch'){
+      try{this.region.setPointerCapture(e.pointerId);}catch{}
+    }
   }
   move(e){
     const g=this.gesture;if(!g||g.id!==e.pointerId)return;
     const dx=e.clientX-g.x,dy=e.clientY-g.y;
     if(!g.locked){
-      if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){this.gesture=null;this.ignoreClickUntil=performance.now()+350;return;}
-      if(Math.abs(dx)<10||Math.abs(dx)<Math.abs(dy)*1.3)return;
+      if(!g.characterSurface&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){this.gesture=null;this.ignoreClickUntil=performance.now()+350;return;}
+      if(Math.abs(dx)<10||(!g.characterSurface&&Math.abs(dx)<Math.abs(dy)*1.3))return;
       g.locked=true;this.region.classList.add('is-dragging');this.actor.style.transition='none';
       try{this.region.setPointerCapture(e.pointerId);}catch{}
     }
@@ -38,8 +46,8 @@ export class DragNavigator {
   }
   up(e){
     const g=this.gesture;if(!g||g.id!==e.pointerId)return;this.gesture=null;
-    if(!g.locked)return;
-    this.ignoreClickUntil=performance.now()+350;this.release(g.id);this.region.classList.remove('is-dragging');clearTimeout(this.quietTimer);
+    this.release(g.id);if(!g.locked)return;
+    this.ignoreClickUntil=performance.now()+350;this.region.classList.remove('is-dragging');clearTimeout(this.quietTimer);
     g.dx=e.clientX-g.x;
     const direction=Math.sign(g.dx),target=this.getIndex()+direction;
     if(Math.abs(g.dx)>=this.threshold()&&target>=0&&target<=this.lastIndex)this.navigate(target);
